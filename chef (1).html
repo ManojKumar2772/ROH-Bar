@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ROH Kitchen — Chef</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0faf5;min-height:100vh;}
+    .topbar{background:#0f3d2e;padding:16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;}
+    .topbar-title{font-size:15px;font-weight:700;color:#d4f5e9;}
+    .topbar-role{font-size:11px;color:#5bb896;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:20px;}
+    .topbar-time{font-size:12px;color:#5bb896;margin-top:4px;}
+    .status-row{font-size:11px;color:#5bb896;margin-top:3px;}
+    .status-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:5px;vertical-align:middle;}
+    .status-dot.off{background:#f59e0b;}
+    .content{padding:14px;max-width:480px;margin:0 auto;}
+    .section-label{font-size:11px;font-weight:600;color:#5bb896;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;margin-top:16px;}
+    .section-label:first-child{margin-top:0;}
+
+    .new-ping{background:#0f3d2e;border:2px solid #22c55e;border-radius:12px;padding:12px 16px;margin-bottom:14px;display:none;align-items:center;gap:10px;}
+    .new-ping.show{display:flex;}
+    .ping-dot{width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0;animation:blink 1s infinite;}
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+    .ping-text{font-size:13px;color:#d4f5e9;font-weight:600;}
+
+    .totals-card{background:#fff;border-radius:14px;border:1px solid #c8eadd;overflow:hidden;margin-bottom:12px;}
+    .totals-header{background:#0f3d2e;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
+    .totals-header-title{font-size:14px;font-weight:600;color:#d4f5e9;}
+    .totals-header-sub{font-size:11px;color:#5bb896;}
+    .totals-cat{font-size:10px;font-weight:700;color:#5bb896;text-transform:uppercase;letter-spacing:0.06em;padding:8px 14px 5px;background:#f0faf5;border-bottom:1px solid #d4edd9;}
+    .totals-row{display:flex;align-items:center;padding:11px 14px;border-bottom:1px solid #e8f5ee;gap:6px;}
+    .totals-row:last-child{border-bottom:none;}
+    .totals-row.zero{opacity:0.4;}
+    .totals-name{font-size:13px;color:#1a3a2a;flex:1;line-height:1.3;}
+    .totals-ordered{font-size:20px;font-weight:700;color:#0f3d2e;min-width:28px;text-align:right;font-variant-numeric:tabular-nums;}
+    .totals-ordered.zero{font-size:14px;color:#bbb;font-weight:400;}
+    .have-wrap{display:flex;align-items:center;gap:4px;margin-left:6px;}
+    .have-label{font-size:9px;color:#aaa;text-align:center;line-height:1.3;min-width:32px;}
+    .have-btn{width:26px;height:26px;border-radius:6px;border:1.5px solid #c8eadd;background:#f0faf5;font-size:15px;color:#0f3d2e;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}
+    .have-btn:active{background:#d4f5e9;}
+    .have-val{min-width:24px;text-align:center;font-size:14px;font-weight:600;color:#0f3d2e;font-variant-numeric:tabular-nums;}
+    .still-needed{min-width:44px;text-align:right;}
+    .still-val{font-size:18px;font-weight:700;color:#ef4444;font-variant-numeric:tabular-nums;}
+    .still-val.done{color:#22c55e;font-size:15px;}
+    .still-val.zero{color:#ccc;font-size:14px;}
+    .still-label{font-size:9px;color:#aaa;text-align:right;}
+    .totals-grand{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;background:#e8f5ee;border-top:1px solid #c8eadd;}
+    .grand-label{font-size:12px;color:#5bb896;font-weight:600;}
+    .grand-val{font-size:15px;font-weight:700;color:#0f3d2e;}
+
+    .legend{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap;}
+    .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#888;}
+    .legend-swatch{width:10px;height:10px;border-radius:50%;}
+
+    .timeline-entry{background:#fff;border-radius:12px;border:1px solid #c8eadd;margin-bottom:8px;overflow:hidden;}
+    .timeline-entry.latest{border-color:#0f3d2e;box-shadow:0 0 0 2px rgba(15,61,46,0.15);}
+    .timeline-header{padding:9px 14px;background:#f0faf5;border-bottom:1px solid #d4edd9;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+    .timeline-time{font-size:14px;font-weight:700;color:#0f3d2e;flex-shrink:0;}
+    .timeline-note{font-size:11px;color:#0f3d2e;background:#c8eadd;padding:2px 9px;border-radius:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .timeline-new{font-size:10px;font-weight:700;color:#fff;background:#ef4444;padding:2px 8px;border-radius:20px;flex-shrink:0;}
+    .timeline-chips{padding:10px 14px;display:flex;flex-wrap:wrap;gap:5px;}
+    .t-chip{background:#e8f5ee;border:1px solid #c8eadd;border-radius:20px;padding:5px 11px;font-size:13px;color:#0f3d2e;}
+    .t-chip b{font-size:15px;font-weight:700;}
+
+    .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;align-items:flex-end;justify-content:center;}
+    .modal-bg.open{display:flex;}
+    .modal{background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;}
+    .modal-title{font-size:17px;font-weight:700;color:#0f3d2e;margin-bottom:4px;}
+    .modal-sub{font-size:12px;color:#888;margin-bottom:16px;}
+    .modal-cat{font-size:11px;font-weight:700;color:#5bb896;text-transform:uppercase;letter-spacing:0.06em;padding:10px 0 4px;border-bottom:1px solid #e8f5ee;margin-top:6px;}
+    .modal-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f5f5f5;}
+    .modal-row:last-child{border-bottom:none;}
+    .modal-item{font-size:14px;color:#333;flex:1;padding-right:8px;}
+    .modal-nums{display:flex;gap:10px;align-items:center;flex-shrink:0;}
+    .m-ordered{font-size:15px;font-weight:700;color:#0f3d2e;}
+    .m-have{font-size:12px;color:#22c55e;background:#e8f5ee;padding:2px 7px;border-radius:10px;}
+    .m-need{font-size:12px;color:#ef4444;background:#fee2e2;padding:2px 7px;border-radius:10px;}
+    .m-done{font-size:12px;color:#22c55e;}
+    .modal-close{width:100%;padding:13px;border-radius:12px;border:none;background:#0f3d2e;color:#d4f5e9;font-size:15px;font-weight:600;cursor:pointer;margin-top:16px;}
+
+    .summary-btn{width:100%;padding:13px;border-radius:12px;border:1.5px solid #0f3d2e;background:transparent;color:#0f3d2e;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:24px;margin-top:8px;}
+    .empty-log{text-align:center;padding:28px;color:#aaa;font-size:13px;}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0f3d2e;color:#d4f5e9;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:100;}
+    .toast.show{opacity:1;}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div>
+    <div class="topbar-title">ROH Kitchen</div>
+    <div class="status-row"><span class="status-dot off" id="status-dot"></span><span id="status-text">Connecting...</span></div>
+  </div>
+  <div style="text-align:right;">
+    <div class="topbar-role">Chef view</div>
+    <div class="topbar-time" id="clock"></div>
+  </div>
+</div>
+
+<div class="content">
+
+  <div class="new-ping" id="new-ping">
+    <div class="ping-dot"></div>
+    <div class="ping-text" id="ping-text">New order received!</div>
+  </div>
+
+  <div class="section-label">Running totals — what to make</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:#0f3d2e"></div>Total ordered</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#22c55e"></div>Already have</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#ef4444"></div>Still to make</div>
+  </div>
+
+  <div class="totals-card">
+    <div class="totals-header">
+      <span class="totals-header-title">Prep board</span>
+      <span class="totals-header-sub" id="totals-updated">Waiting...</span>
+    </div>
+
+    <div class="totals-cat">Sandwiches</div>
+    <div class="totals-row zero" id="trow-salmon">
+      <span class="totals-name">Smoked salmon sandwich</span>
+      <div class="have-wrap">
+        <button class="have-btn" onclick="adjHave('salmon',-1)">−</button>
+        <span class="have-val" id="have-salmon">0</span>
+        <button class="have-btn" onclick="adjHave('salmon',1)">+</button>
+        <div class="have-label">already have</div>
+      </div>
+      <div class="still-needed"><div class="still-val zero" id="need-salmon">—</div><div class="still-label">still need</div></div>
+      <span class="totals-ordered zero" id="tot-salmon">—</span>
+    </div>
+    <div class="totals-row zero" id="trow-egg">
+      <span class="totals-name">Truffle egg &amp; mayo</span>
+      <div class="have-wrap">
+        <button class="have-btn" onclick="adjHave('egg',-1)">−</button>
+        <span class="have-val" id="have-egg">0</span>
+        <button class="have-btn" onclick="adjHave('egg',1)">+</button>
+        <div class="have-label">already have</div>
+      </div>
+      <div class="still-needed"><div class="still-val zero" id="need-egg">—</div><div class="still-label">still need</div></div>
+      <span class="totals-ordered zero" id="tot-egg">—</span>
+    </div>
+    <div class="totals-row zero" id="trow-chicken">
+      <span class="totals-name">Club chicken</span>
+      <div class="have-wrap">
+        <button class="have-btn" onclick="adjHave('chicken',-1)">−</button>
+        <span class="have-val" id="have-chicken">0</span>
+        <button class="have-btn" onclick="adjHave('chicken',1)">+</button>
+        <div class="have-label">already have</div>
+      </div>
+      <div class="still-needed"><div class="still-val zero" id="need-chicken">—</div><div class="still-label">still need</div></div>
+      <span class="totals-ordered zero" id="tot-chicken">—</span>
+    </div>
+    <div class="totals-row zero" id="trow-hummus">
+      <span class="totals-name">Hummus &amp; sundried tomato</span>
+      <div class="have-wrap">
+        <button class="have-btn" onclick="adjHave('hummus',-1)">−</button>
+        <span class="have-val" id="have-hummus">0</span>
+        <button class="have-btn" onclick="adjHave('hummus',1)">+</button>
+        <div class="have-label">already have</div>
+      </div>
+      <div class="still-needed"><div class="still-val zero" id="need-hummus">—</div><div class="still-label">still need</div></div>
+      <span class="totals-ordered zero" id="tot-hummus">—</span>
+    </div>
+    <div class="totals-row zero" id="trow-beef">
+      <span class="totals-name">Beef sandwich</span>
+      <div class="have-wrap">
+        <button class="have-btn" onclick="adjHave('beef',-1)">−</button>
+        <span class="have-val" id="have-beef">0</span>
+        <button class="have-btn" onclick="adjHave('beef',1)">+</button>
+        <div class="have-label">already have</div>
+      </div>
+      <div class="still-needed"><div class="still-val zero" id="need-beef">—</div><div class="still-label">still need</div></div>
+      <span class="totals-ordered zero" id="tot-beef">—</span>
+    </div>
+    <div class="totals-row zero" id="trow-selection">
+      <span class="totals-name">Sandwich selection</span>
+      <div class="have-wrap">
+        <button class="have-btn" onclick="adjHave('selection',-1)">−</button>
+        <span class="have-val" id="have-selection">0</span>
+        <button class="have-btn" onclick="adjHave('selection',1)">+</button>
+        <div class="have-label">already have</div>
+      </div>
+      <div class="still-needed"><div class="still-val zero" id="need-selection">—</div><div class="still-label">still need</div></div>
+      <span class="totals-ordered zero" id="tot-selection">—</span>
+    </div>
+    <div class="totals-row zero" id="trow-gf">
+      <span class="totals-name">Gluten free option</span>
+      <div class="have-wrap">
+        <button class="have-btn" onclick="adjHave('gf',-1)">−</button>
+        <span class="have-val" id="have-gf">0</span>
+        <button class="have-btn" onclick="adjHave('gf',1)">+</button>
+        <div class="have-label">already have</div>
+      </div>
+      <div class="still-needed"><div class="still-val zero" id="need-gf">—</div><div class="still-label">still need</div></div>
+      <span class="totals-ordered zero" id="tot-gf">—</span>
+    </div>
+
+    <div class="totals-cat">Plates</div>
+    <div class="totals-row zero" id="trow-ploughman">
+      <span class="totals-name">Ploughman plate</span>
+      <div class="have-wrap">
+        <button class="have-btn" onclick="adjHave('ploughman',-1)">−</button>
+        <span class="have-val" id="have-ploughman">0</span>
+        <button class="have-btn" onclick="adjHave('ploughman',1)">+</button>
+        <div class="have-label">already have</div>
+      </div>
+      <div class="still-needed"><div class="still-val zero" id="need-ploughman">—</div><div class="still-label">still need</div></div>
+      <span class="totals-ordered zero" id="tot-ploughman">—</span>
+    </div>
+    <div class="totals-row zero" id="trow-salmonplate">
+      <span class="totals-name">Salmon plate</span>
+      <div class="have-wrap">
+        <button class="have-btn" onclick="adjHave('salmonplate',-1)">−</button>
+        <span class="have-val" id="have-salmonplate">0</span>
+        <button class="have-btn" onclick="adjHave('salmonplate',1)">+</button>
+        <div class="have-label">already have</div>
+      </div>
+      <div class="still-needed"><div class="still-val zero" id="need-salmonplate">—</div><div class="still-label">still need</div></div>
+      <span class="totals-ordered zero" id="tot-salmonplate">—</span>
+    </div>
+    <div class="totals-row zero" id="trow-charcuterie">
+      <span class="totals-name">Charcuterie</span>
+      <div class="have-wrap">
+        <button class="have-btn" onclick="adjHave('charcuterie',-1)">−</button>
+        <span class="have-val" id="have-charcuterie">0</span>
+        <button class="have-btn" onclick="adjHave('charcuterie',1)">+</button>
+        <div class="have-label">already have</div>
+      </div>
+      <div class="still-needed"><div class="still-val zero" id="need-charcuterie">—</div><div class="still-label">still need</div></div>
+      <span class="totals-ordered zero" id="tot-charcuterie">—</span>
+    </div>
+    <div class="totals-row zero" id="trow-terrine">
+      <span class="totals-name">Farmhouse terrine</span>
+      <div class="have-wrap">
+        <button class="have-btn" onclick="adjHave('terrine',-1)">−</button>
+        <span class="have-val" id="have-terrine">0</span>
+        <button class="have-btn" onclick="adjHave('terrine',1)">+</button>
+        <div class="have-label">already have</div>
+      </div>
+      <div class="still-needed"><div class="still-val zero" id="need-terrine">—</div><div class="still-label">still need</div></div>
+      <span class="totals-ordered zero" id="tot-terrine">—</span>
+    </div>
+    <div class="totals-row zero" id="trow-cheese">
+      <span class="totals-name">Cheese plate</span>
+      <div class="have-wrap">
+        <button class="have-btn" onclick="adjHave('cheese',-1)">−</button>
+        <span class="have-val" id="have-cheese">0</span>
+        <button class="have-btn" onclick="adjHave('cheese',1)">+</button>
+        <div class="have-label">already have</div>
+      </div>
+      <div class="still-needed"><div class="still-val zero" id="need-cheese">—</div><div class="still-label">still need</div></div>
+      <span class="totals-ordered zero" id="tot-cheese">—</span>
+    </div>
+
+    <div class="totals-grand">
+      <span class="grand-label">Total items ordered this shift</span>
+      <span class="grand-val" id="grand-total">0</span>
+    </div>
+  </div>
+
+  <div class="section-label">Order timeline — most recent first</div>
+  <div id="timeline-log"><div class="empty-log">Waiting for orders from supervisors...</div></div>
+
+  <button class="summary-btn" onclick="openSummary()">End of shift summary</button>
+
+</div>
+
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-title">End of shift summary</div>
+    <div class="modal-sub" id="modal-date"></div>
+    <div id="modal-content"></div>
+    <button class="modal-close" onclick="document.getElementById('modal-bg').classList.remove('open')">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDsIlFQFzP6uRTv8CwaBNH5kaJO_v5Poa0",
+    authDomain: "roh-bar.firebaseapp.com",
+    databaseURL: "https://roh-bar-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "roh-bar",
+    storageBucket: "roh-bar.firebasestorage.app",
+    messagingSenderId: "706628852748",
+    appId: "1:706628852748:web:b86f6ac99fdb342283a229"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const ITEMS = ['salmon','egg','chicken','hummus','beef','selection','gf','ploughman','salmonplate','charcuterie','terrine','cheese'];
+  const LABELS = {
+    salmon:'Smoked salmon sandwich', egg:'Truffle egg & mayo', chicken:'Club chicken',
+    hummus:'Hummus & sundried tomato', beef:'Beef sandwich', selection:'Sandwich selection',
+    gf:'Gluten free option', ploughman:'Ploughman plate', salmonplate:'Salmon plate',
+    charcuterie:'Charcuterie', terrine:'Farmhouse terrine', cheese:'Cheese plate'
+  };
+  const CATS = {
+    salmon:'Sandwiches', egg:'Sandwiches', chicken:'Sandwiches', hummus:'Sandwiches',
+    beef:'Sandwiches', selection:'Sandwiches', gf:'Sandwiches',
+    ploughman:'Plates', salmonplate:'Plates', charcuterie:'Plates', terrine:'Plates', cheese:'Plates'
+  };
+
+  let orderTotals = {};
+  let fulfilled = {};
+  let prevOrderCount = 0;
+  ITEMS.forEach(i => { orderTotals[i]=0; fulfilled[i]=0; });
+
+  window.adjHave = async function(item, dir) {
+    fulfilled[item] = Math.max(0, fulfilled[item] + dir);
+    document.getElementById('have-'+item).textContent = fulfilled[item];
+    updateRow(item);
+    await set(ref(db,'fulfilled/'+item), fulfilled[item]);
+  };
+
+  function updateRow(item) {
+    const ordered = orderTotals[item];
+    const have = fulfilled[item];
+    const need = Math.max(0, ordered - have);
+    const totEl = document.getElementById('tot-'+item);
+    const needEl = document.getElementById('need-'+item);
+    const rowEl = document.getElementById('trow-'+item);
+    if (ordered === 0) {
+      totEl.textContent='—'; totEl.className='totals-ordered zero';
+      needEl.textContent='—'; needEl.className='still-val zero';
+      rowEl.className='totals-row zero';
+    } else {
+      totEl.textContent=ordered; totEl.className='totals-ordered';
+      rowEl.className='totals-row';
+      if (need === 0) { needEl.textContent='✓'; needEl.className='still-val done'; }
+      else { needEl.textContent=need; needEl.className='still-val'; }
+    }
+  }
+
+  onValue(ref(db,'orders'), snap => {
+    const data = snap.val() || {};
+    const entries = Object.values(data).sort((a,b) => a.timestamp - b.timestamp);
+    ITEMS.forEach(i => orderTotals[i]=0);
+    entries.forEach(e => { ITEMS.forEach(i => { orderTotals[i]+=(e.items?.[i]||0); }); });
+    const grand = ITEMS.reduce((s,i)=>s+orderTotals[i],0);
+    document.getElementById('grand-total').textContent = grand;
+    ITEMS.forEach(i => updateRow(i));
+    const now = new Date();
+    document.getElementById('totals-updated').textContent = 'Updated '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
+
+    const newCount = entries.length;
+    if (newCount > prevOrderCount && prevOrderCount > 0) {
+      const latest = entries[entries.length-1];
+      document.getElementById('ping-text').textContent = 'New order at '+latest.timeStr+(latest.note?' — '+latest.note:'')+'!';
+      const ping = document.getElementById('new-ping');
+      ping.classList.add('show');
+      setTimeout(()=>ping.classList.remove('show'), 7000);
+    }
+    prevOrderCount = newCount;
+
+    const reversed = [...entries].reverse();
+    const logEl = document.getElementById('timeline-log');
+    if (!reversed.length) { logEl.innerHTML='<div class="empty-log">Waiting for orders from supervisors...</div>'; return; }
+    logEl.innerHTML = reversed.map((e, idx) => {
+      const isLatest = idx===0;
+      const chips = Object.entries(e.items||{}).map(([k,v])=>`<div class="t-chip"><b>${v}</b> ${LABELS[k]||k}</div>`).join('');
+      const notePart = e.note ? `<span class="timeline-note">${e.note}</span>` : '';
+      const newBadge = isLatest && newCount > 1 ? '<span class="timeline-new">LATEST</span>' : '';
+      return `<div class="timeline-entry${isLatest?' latest':''}">
+        <div class="timeline-header"><span class="timeline-time">${e.timeStr}</span>${notePart}${newBadge}</div>
+        <div class="timeline-chips">${chips}</div>
+      </div>`;
+    }).join('');
+  });
+
+  onValue(ref(db,'fulfilled'), snap => {
+    const data = snap.val()||{};
+    ITEMS.forEach(i => {
+      fulfilled[i]=data[i]||0;
+      document.getElementById('have-'+i).textContent=fulfilled[i];
+      updateRow(i);
+    });
+  });
+
+  window.openSummary = function() {
+    const now = new Date();
+    document.getElementById('modal-date').textContent = now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})+' — end of shift';
+    const catGroups = {};
+    ITEMS.forEach(i => {
+      if(orderTotals[i]===0) return;
+      const cat = CATS[i];
+      if(!catGroups[cat]) catGroups[cat]=[];
+      catGroups[cat].push(i);
+    });
+    let html='';
+    Object.entries(catGroups).forEach(([cat,items])=>{
+      html+=`<div class="modal-cat">${cat}</div>`;
+      items.forEach(i=>{
+        const need=Math.max(0,orderTotals[i]-fulfilled[i]);
+        html+=`<div class="modal-row">
+          <span class="modal-item">${LABELS[i]}</span>
+          <div class="modal-nums">
+            <span class="m-ordered">${orderTotals[i]}</span>
+            ${fulfilled[i]>0?`<span class="m-have">${fulfilled[i]} had</span>`:''}
+            ${need>0?`<span class="m-need">${need} needed</span>`:`<span class="m-done">✓ done</span>`}
+          </div>
+        </div>`;
+      });
+    });
+    if(!html) html='<p style="color:#999;font-size:14px;padding:16px 0;">No orders recorded this shift.</p>';
+    document.getElementById('modal-content').innerHTML=html;
+    document.getElementById('modal-bg').classList.add('open');
+  };
+
+  function tick(){const n=new Date();document.getElementById('clock').textContent=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');}
+  tick(); setInterval(tick,1000);
+
+  onValue(ref(db,'.info/connected'),snap=>{
+    document.getElementById('status-dot').className='status-dot'+(snap.val()?'':' off');
+    document.getElementById('status-text').textContent=snap.val()?'Live':'Reconnecting...';
+  });
+</script>
+</body>
+</html>
