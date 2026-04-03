@@ -120,7 +120,7 @@
     <div class="prep-row" id="row-bonfaro" onclick="toggleDone('bonfaro')"><div class="prep-left"><div class="check-circle" id="chk-bonfaro"><div class="check-tick"></div></div><span class="prep-item-name">Bonfaro</span></div><div class="prep-count-right"><span class="prep-count zero" id="pc-bonfaro">—</span><span class="prep-breakdown" id="pb-bonfaro"></span></div></div>
     <div class="prep-cat">Soft drinks</div>
     <div class="prep-row" id="row-dcoke" onclick="toggleDone('dcoke')"><div class="prep-left"><div class="check-circle" id="chk-dcoke"><div class="check-tick"></div></div><span class="prep-item-name">Diet Coke</span></div><div class="prep-count-right"><span class="prep-count zero" id="pc-dcoke">—</span><span class="prep-breakdown" id="pb-dcoke"></span></div></div>
-    <div class="prep-row" id="row-peach" onclick="toggleDone('peach')"><div class="prep-left"><div class="check-circle" id="chk-peach"><div class="check-tick"></div></div><span class="prep-item-name">Peach & jasmine soda</span></div><div class="prep-count-right"><span class="prep-count zero" id="pc-peach">—</span><span class="prep-breakdown" id="pb-peach"></span></div></div>
+    <div class="prep-row" id="row-peach" onclick="toggleDone('peach')"><div class="prep-left"><div class="check-circle" id="chk-peach"><div class="check-tick"></div></div><span class="prep-item-name">Peach &amp; jasmine soda</span></div><div class="prep-count-right"><span class="prep-count zero" id="pc-peach">—</span><span class="prep-breakdown" id="pb-peach"></span></div></div>
     <div class="prep-row" id="row-grape" onclick="toggleDone('grape')"><div class="prep-left"><div class="check-circle" id="chk-grape"><div class="check-tick"></div></div><span class="prep-item-name">Pink grapefruit soda</span></div><div class="prep-count-right"><span class="prep-count zero" id="pc-grape">—</span><span class="prep-breakdown" id="pb-grape"></span></div></div>
     <div class="prep-cat">Snacks</div>
     <div class="prep-row" id="row-crisps" onclick="toggleDone('crisps')"><div class="prep-left"><div class="check-circle" id="chk-crisps"><div class="check-tick"></div></div><span class="prep-item-name">Crisps</span></div><div class="prep-count-right"><span class="prep-count zero" id="pc-crisps">—</span><span class="prep-breakdown" id="pb-crisps"></span></div></div>
@@ -145,28 +145,16 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, set, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyDsIlFQFzP6uRTv8CwaBNH5kaJO_v5Poa0",
-  authDomain: "roh-bar.firebaseapp.com",
-  databaseURL: "https://roh-bar-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "roh-bar",
-  storageBucket: "roh-bar.firebasestorage.app",
-  messagingSenderId: "706628852748",
-  appId: "1:706628852748:web:b86f6ac99fdb342283a229",
-  measurementId: "G-1PKE3MSYJ1"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+  const firebaseConfig = {
+    apiKey: "AIzaSyDsIlFQFzP6uRTv8CwaBNH5kaJO_v5Poa0",
+    authDomain: "roh-bar.firebaseapp.com",
+    databaseURL: "https://roh-bar-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "roh-bar",
+    storageBucket: "roh-bar.firebasestorage.app",
+    messagingSenderId: "706628852748",
+    appId: "1:706628852748:web:b86f6ac99fdb342283a229",
+    measurementId: "G-1PKE3MSYJ1"
+  };
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);

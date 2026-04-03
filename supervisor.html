@@ -98,7 +98,7 @@
     <div class="item-row"><span class="item-name">Picpoul</span><div class="qty-wrap"><button class="qty-btn" onclick="adj('picpoul',-1)">−</button><span class="qty-val" id="q-picpoul">0</span><button class="qty-btn" onclick="adj('picpoul',1)">+</button></div></div>
     <div class="item-row"><span class="item-name">Bonfaro</span><div class="qty-wrap"><button class="qty-btn" onclick="adj('bonfaro',-1)">−</button><span class="qty-val" id="q-bonfaro">0</span><button class="qty-btn" onclick="adj('bonfaro',1)">+</button></div></div>
     <div class="item-row"><span class="item-name">Diet Coke</span><div class="qty-wrap"><button class="qty-btn" onclick="adj('dcoke',-1)">−</button><span class="qty-val" id="q-dcoke">0</span><button class="qty-btn" onclick="adj('dcoke',1)">+</button></div></div>
-    <div class="item-row"><span class="item-name">Peach & jasmine soda</span><div class="qty-wrap"><button class="qty-btn" onclick="adj('peach',-1)">−</button><span class="qty-val" id="q-peach">0</span><button class="qty-btn" onclick="adj('peach',1)">+</button></div></div>
+    <div class="item-row"><span class="item-name">Peach &amp; jasmine soda</span><div class="qty-wrap"><button class="qty-btn" onclick="adj('peach',-1)">−</button><span class="qty-val" id="q-peach">0</span><button class="qty-btn" onclick="adj('peach',1)">+</button></div></div>
     <div class="item-row"><span class="item-name">Pink grapefruit soda</span><div class="qty-wrap"><button class="qty-btn" onclick="adj('grape',-1)">−</button><span class="qty-val" id="q-grape">0</span><button class="qty-btn" onclick="adj('grape',1)">+</button></div></div>
     <div class="item-row"><span class="item-name">Crisps</span><div class="qty-wrap"><button class="qty-btn" onclick="adj('crisps',-1)">−</button><span class="qty-val" id="q-crisps">0</span><button class="qty-btn" onclick="adj('crisps',1)">+</button></div></div>
     <div class="item-row"><span class="item-name">Crackers</span><div class="qty-wrap"><button class="qty-btn" onclick="adj('crackers',-1)">−</button><span class="qty-val" id="q-crackers">0</span><button class="qty-btn" onclick="adj('crackers',1)">+</button></div></div>
@@ -126,7 +126,7 @@
     <div class="live-row"><span class="live-item">Bonfaro</span><span class="live-count zero" id="ls-bonfaro">—</span></div>
     <div class="live-cat">Soft drinks</div>
     <div class="live-row"><span class="live-item">Diet Coke</span><span class="live-count zero" id="ls-dcoke">—</span></div>
-    <div class="live-row"><span class="live-item">Peach & jasmine soda</span><span class="live-count zero" id="ls-peach">—</span></div>
+    <div class="live-row"><span class="live-item">Peach &amp; jasmine soda</span><span class="live-count zero" id="ls-peach">—</span></div>
     <div class="live-row"><span class="live-item">Pink grapefruit soda</span><span class="live-count zero" id="ls-grape">—</span></div>
     <div class="live-cat">Snacks</div>
     <div class="live-row"><span class="live-item">Crisps</span><span class="live-count zero" id="ls-crisps">—</span></div>
@@ -153,28 +153,16 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyDsIlFQFzP6uRTv8CwaBNH5kaJO_v5Poa0",
-  authDomain: "roh-bar.firebaseapp.com",
-  databaseURL: "https://roh-bar-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "roh-bar",
-  storageBucket: "roh-bar.firebasestorage.app",
-  messagingSenderId: "706628852748",
-  appId: "1:706628852748:web:b86f6ac99fdb342283a229",
-  measurementId: "G-1PKE3MSYJ1"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+  const firebaseConfig = {
+    apiKey: "AIzaSyDsIlFQFzP6uRTv8CwaBNH5kaJO_v5Poa0",
+    authDomain: "roh-bar.firebaseapp.com",
+    databaseURL: "https://roh-bar-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "roh-bar",
+    storageBucket: "roh-bar.firebasestorage.app",
+    messagingSenderId: "706628852748",
+    appId: "1:706628852748:web:b86f6ac99fdb342283a229",
+    measurementId: "G-1PKE3MSYJ1"
+  };
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
@@ -272,11 +260,9 @@ const analytics = getAnalytics(app);
     setTimeout(()=>t.classList.remove('show'),2500);
   };
 
-  // Clock
   function tick(){ const n=new Date(); document.getElementById('clock').textContent=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0'); }
   tick(); setInterval(tick,1000);
 
-  // Connection status
   const connRef = ref(db,'.info/connected');
   onValue(connRef, snap=>{
     const dot=document.getElementById('status-dot');
